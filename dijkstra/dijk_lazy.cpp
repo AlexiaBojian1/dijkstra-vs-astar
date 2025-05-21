@@ -1,6 +1,7 @@
 #include <bits/stdc++.h>
 using namespace std;
-using Graph = vector<vector<Edge>>
+struct Edge{int to; double w;};
+using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
 
 vector<double> dijkstra_lazy(const Graph& G, int s, int t = -1) {
