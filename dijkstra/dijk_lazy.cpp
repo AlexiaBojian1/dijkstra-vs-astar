@@ -1,4 +1,6 @@
 #include <bits/stdc++.h>
+#include <fstream>
+
 using namespace std;
 struct Edge
 {
@@ -7,6 +9,20 @@ struct Edge
 };
 using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
+
+Graph read_graph(const string& fname) {
+    ifstream in(fname);
+    int n, m;
+    in>> n >> m;
+    Graph G(n);
+    for(int i = 0, u, v; i < m; i++) {
+        double w;
+        in >> u >> v >> w;
+        G[u].push_back({v , w});
+        G[v].push_back({u , w});
+    }
+    return G;
+}
 
 vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1)
 {
@@ -40,10 +56,15 @@ vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1)
 
 int main()
 {
-    Graph G(4);
-    G[0] = {{1, 1}, {2, 4}};
-    G[1] = {{2, 2}, {3, 5}};
-    G[2] = {{3, 1}};
-    auto d = dijkstra_lazy(G, 0);
-    cout << "dist(0->3)=" << d[3] << "\n"; // should print 4
+    // Graph G(4);
+    // G[0] = {{1, 1}, {2, 4}};
+    // G[1] = {{2, 2}, {3, 5}};
+    // G[2] = {{3, 1}};
+    // auto d = dijkstra_lazy(G, 0);
+    // cout << "dist(0->3)=" << d[3] << "\n"; // should print 4
+
+    Graph G = read_graph("graph_large.txt");
+    auto dist = dijkstra_lazy(G, 0, G.size()-1);
+    cout<<dist[ G.size()-1]<<"\n";
+
 }
