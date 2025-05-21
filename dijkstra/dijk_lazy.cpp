@@ -1,25 +1,35 @@
 #include <bits/stdc++.h>
 using namespace std;
-struct Edge{int to; double w;};
+struct Edge
+{
+    int to;
+    double w;
+};
 using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
 
-vector<double> dijkstra_lazy(const Graph& G, int s, int t = -1) {
+vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1)
+{
     int n = G.size();
     vector<double> dist(n, INF);
-    vector<char> vis(n,0);
+    vector<char> vis(n, 0);
     using Node = pair<double, int>;
     priority_queue<Node, vector<Node>, greater<Node>> pq;
     dist[s] = 0;
-    pq.emplace(0,s);
-    while(!pq.empty()) {
-        auto [d,u] = pq.top();
+    pq.emplace(0, s);
+    while (!pq.empty())
+    {
+        auto [d, u] = pq.top();
         pq.pop();
-        if(vis[u]) continue;
+        if (vis[u])
+            continue;
         vis[u] = 1;
-        if(u == t) break;
-        for(auto [v,w] : G[u]) {
-            if(!vis[v] && d + w < dist[v]) {
+        if (u == t)
+            break;
+        for (auto [v, w] : G[u])
+        {
+            if (!vis[v] && d + w < dist[v])
+            {
                 dist[v] = d + w;
                 pq.emplace(dist[v], v);
             }
@@ -28,8 +38,12 @@ vector<double> dijkstra_lazy(const Graph& G, int s, int t = -1) {
     return dist;
 }
 
-int main(){
+int main()
+{
     Graph G(4);
-    G[0]={{1,1},{2,4}}; G[1]={{2,2},{3,5}}; G[2]={{3,1}};
-    auto d=dijkstra_lazy(G,0); cout<<"dist(0->3)="<<d[3]<<"\n"; // should print 4
+    G[0] = {{1, 1}, {2, 4}};
+    G[1] = {{2, 2}, {3, 5}};
+    G[2] = {{3, 1}};
+    auto d = dijkstra_lazy(G, 0);
+    cout << "dist(0->3)=" << d[3] << "\n"; // should print 4
 }
