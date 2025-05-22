@@ -1,3 +1,5 @@
+//Lazy binary-heap Dijkstra: pushes every tentative edge cost into a binary heap and simply ignores outdated entries when popped, 
+//trading extra inserts for simpler code.
 #include <bits/stdc++.h>
 #include <fstream>
 

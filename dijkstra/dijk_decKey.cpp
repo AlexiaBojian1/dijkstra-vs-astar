@@ -1,3 +1,6 @@
+//Decrease-key heap Dijkstra: uses a binary (or pairing) heap’s decrease-key operation to update a 
+//vertex’s distance in place, giving optimal O((V + E) log V) without wasted inserts.
+
 #include <bits/stdc++.h>
 using namespace std;
 struct Edge
