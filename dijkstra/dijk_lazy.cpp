@@ -15,7 +15,6 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> start_time;
 };
 
-
 using namespace std;
 struct Edge
 {
@@ -77,9 +76,10 @@ int main()
     // G[2] = {{3, 1}};
     // auto d = dijkstra_lazy(G, 0);
     // cout << "dist(0->3)=" << d[3] << "\n"; // should print 4
-
-    Graph G = read_graph("graph_large.txt");
+    Timer runtime;
+    Graph G = read_graph("../data/graph_large.txt");
     auto dist = dijkstra_lazy(G, 0, G.size()-1);
     cout<<dist[ G.size()-1]<<"\n";
+	cout << "time = " << runtime.elapsed().count() << '\n';
 
 }
