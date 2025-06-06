@@ -8,11 +8,33 @@ public:
 	Timer() {
 		start_time = std::chrono::system_clock::now();
 	}
-	std::chrono::duration<double> elapsed() const {
-		return (std::chrono::system_clock::now() - start_time);
-	}
+	void start() {
+        if (!running) {
+            running = true;
+            start_time = std::chrono::high_resolution_clock::now();
+        }
+    }
+
+    void pause() {
+        if (running) {
+            auto now = std::chrono::high_resolution_clock::now();
+            total_elapsed += std::chrono::duration<double>(now - start_time).count();
+            running = false;
+        }
+    }
+
+    double elapsed() const {
+        if (running) {
+            auto now = std::chrono::high_resolution_clock::now();
+            return total_elapsed + std::chrono::duration<double>(now - start_time).count();
+        }
+        return total_elapsed;
+    }
+
 private:
-	std::chrono::time_point<std::chrono::system_clock> start_time;
+    bool running;
+    double total_elapsed;
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
 };
 
 using namespace std;
@@ -38,8 +60,10 @@ Graph read_graph(const string& fname) {
     return G;
 }
 
-vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1)
+vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1, Timer* timer = nullptr)
 {
+    timer->start();
+
     int n = G.size();
     vector<double> dist(n, INF);
     vector<char> vis(n, 0);
@@ -47,6 +71,7 @@ vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1)
     priority_queue<Node, vector<Node>, greater<Node>> pq;
     dist[s] = 0;
     pq.emplace(0, s);
+
     while (!pq.empty())
     {
         auto [d, u] = pq.top();
@@ -65,6 +90,8 @@ vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1)
             }
         }
     }
+
+    timer->pause();
     return dist;
 }
 
@@ -77,9 +104,9 @@ int main()
     // auto d = dijkstra_lazy(G, 0);
     // cout << "dist(0->3)=" << d[3] << "\n"; // should print 4
     Timer runtime;
-    Graph G = read_graph("../data/graph_large.txt");
-    auto dist = dijkstra_lazy(G, 0, G.size()-1);
+    Graph G = read_graph("../map_data/graph_large_edges.txt");
+    auto dist = dijkstra_lazy(G, 0, G.size()-1, &runtime);
     cout<<dist[ G.size()-1]<<"\n";
-	cout << "time = " << runtime.elapsed().count() << '\n';
+	cout << "time = " << runtime.elapsed() << " seconds\n";
 
 }
