@@ -4,7 +4,7 @@ import folium
 OUTPUT_MAP = "graph_large_map.html"
 NODES_TXT = "graph_large_nodes.txt"
 
-# needs to be set if true
+# needs to be set to true if wants to be executed
 visualize_all = True
 EDGES_TXT = "graph_large_edges.txt"
 
@@ -66,6 +66,6 @@ if(visualize_final):
         coord2 = nodes[final_path[i + 1]]
         folium.PolyLine([coord1, coord2], color='red', weight=4).add_to(m)
 
-
+print("Saving...")
 m.save(OUTPUT_MAP)
 print("Done.")

@@ -24,8 +24,8 @@ int main() {
     const string input_file = "../map_data/graph_large_edges.txt";
     const string explored_output = "../map_data/graph_large_visited_edges.txt";
     const string path_output = "../map_data/graph_large_final_nodes.txt";
-    const int start_node = 100;     // <---- Hardcoded start
-    const int target_node = 250;  // <---- Hardcoded target (adjust!)
+    const int start_node = 20;     // <---- Hardcoded start
+    const int target_node = 100;  // <---- Hardcoded target (adjust!)
 
     // --- Read graph ---
     ifstream infile(input_file);
@@ -87,11 +87,9 @@ int main() {
     if (dist[target_node] == INF) {
         cerr << "No path found from " << start_node << " to " << target_node << "\n";
     } else {
-        int u = path.top(); path.pop();
         while (!path.empty()) {
-            int v = path.top(); path.pop();
-            path_out << u << " " << v << "\n";
-            u = v;
+            path_out << path.top() << " " << "\n";
+            path.pop();
         }
     }
 
