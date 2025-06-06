@@ -3,6 +3,19 @@
 #include <bits/stdc++.h>
 #include <fstream>
 
+class Timer {
+public:
+	Timer() {
+		start_time = std::chrono::system_clock::now();
+	}
+	std::chrono::duration<double> elapsed() const {
+		return (std::chrono::system_clock::now() - start_time);
+	}
+private:
+	std::chrono::time_point<std::chrono::system_clock> start_time;
+};
+
+
 using namespace std;
 struct Edge
 {
