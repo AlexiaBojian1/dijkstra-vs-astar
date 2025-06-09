@@ -2,19 +2,15 @@
 //dropping the total time to O(E + V log V) at the cost of higher constant factors.
 
 #include "../helpers/timer.h"
+#include "../helpers/graph_io.h"
 #include <iostream>
 #include <bits/stdc++.h>
 #include <boost/heap/fibonacci_heap.hpp>
+
 using namespace std;
-struct Edge
-{
-    int to;
-    double w;
-};
-using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
 
-vector<double> dijkstra_fib(const Graph &G, int s, int t = -1, Timer* timer = nullptr)
+vector<double> dijkstra_fib(const Graph &G, int s, int t, std::vector<std::pair<int, int>>& explored_edges, vector<int>& prev, Timer* timer)
 {
     timer->start();
     using Node = pair<double, int>;
@@ -27,6 +23,12 @@ vector<double> dijkstra_fib(const Graph &G, int s, int t = -1, Timer* timer = nu
     Fib pq;
     dist[s] = 0;
     ref[s] = pq.push({0, s});
+
+    // For path reconstruction
+    timer->pause();
+    prev.assign(n, -1);
+    timer->start();
+
     while (!pq.empty())
     {
         auto [d, u] = pq.top();
@@ -36,15 +38,27 @@ vector<double> dijkstra_fib(const Graph &G, int s, int t = -1, Timer* timer = nu
         vis[u] = 1;
         if (u == t)
             break;
-        for (auto [v, w] : G[u])
+        for (auto [v, w] : G[u]) {
             if (!vis[v] && d + w < dist[v])
             {
                 dist[v] = d + w;
+
+                timer->pause();
+                prev[v] = u;
+                timer->start();
+
                 if (ref[v] == Handle())
                     ref[v] = pq.push({dist[v], v});
                 else
                     pq.update(ref[v], {dist[v], v});
             }
+            
+            // Logging visited edges
+            timer->pause();
+            explored_edges.push_back({u, v});
+            timer->start();
+
+        }
     }
     timer->pause();
     return dist;
@@ -53,12 +67,20 @@ vector<double> dijkstra_fib(const Graph &G, int s, int t = -1, Timer* timer = nu
 /* ---------- demo ---------- */
 int main()
 {
+    string input = "../input_edges/graph_large_edges.txt";
+    string explored_output = "../map_data/graph_large_visited_edges_dijk_Fib.txt";
+    string path_output = "../map_data/graph_large_final_nodes_dijk_Fib.txt";
+
     Timer runtime;
-    Graph G(4);
-    G[0] = {{1, 1}, {2, 4}};
-    G[1] = {{2, 2}, {3, 5}};
-    G[2] = {{3, 1}};
-    auto d = dijkstra_fib(G, 0, &runtime);
-    cout << "dist(0->3)=" << d[3] << "\n"; // 4
-    cout << "time = " << runtime.elapsed() << " seconds\n";
+    Graph G = read_graph(input);
+    int s = 0, t = G.size() - 1;
+    vector<int> prev;
+    std::vector<std::pair<int, int>> explored;
+
+    auto dist = dijkstra_fib(G, s, t, explored, prev, &runtime);
+    write_edges(explored_output, explored);
+    write_path(path_output, reconstruct_path(prev, t));
+
+    cout << "Shortest distance: " << dist[t] << "\n";
+    cout << "Time: " << runtime.elapsed() << " seconds\n";
 }

@@ -17,7 +17,7 @@ echo [3/4] Compiling dijk_decKey...
 g++ -std=c++17 -I..\helpers dijk_decKey.cpp ..\helpers\timer.cpp -o ..\build\dijkstra_decKey.exe
 
 echo [4/4] Compiling dijk_Fib...
-g++ -std=c++17 -I..\helpers dijk_Fib.cpp ..\helpers\timer.cpp -lboost_heap -o ..\build\dijkstra_fib.exe
+g++ -std=c++17 -I..\helpers -I..\vcpkg\installed\x64-windows\include dijk_Fib.cpp ..\helpers\timer.cpp -o ..\build\dijkstra_fib.exe
 
 echo ==============================
 echo Running All Dijkstra Variants

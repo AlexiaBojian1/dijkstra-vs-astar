@@ -1,39 +1,17 @@
-// g++ -std=c++17 -Iinclude dijkstra/dijk_lazy.cpp helpers/timer.cpp -o build/dijkstra_lazy_large
-// ./build/dijkstra_lazy_large.exe
 //Lazy binary-heap Dijkstra: pushes every tentative edge cost into a binary heap and simply ignores outdated entries when popped, 
 //trading extra inserts for simpler code.
 #include "../helpers/timer.h"
+#include "../helpers/graph_io.h"
 #include <iostream>
 #include <bits/stdc++.h>
 #include <fstream>
 
 using namespace std;
-struct Edge
-{
-    int to;
-    double w;
-};
-using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
 
-Graph read_graph(const string& fname) {
-    ifstream in(fname);
-    int n, m;
-    in>> n >> m;
-    Graph G(n);
-    for(int i = 0, u, v; i < m; i++) {
-        double w;
-        in >> u >> v >> w;
-        G[u].push_back({v , w});
-        G[v].push_back({u , w});
-    }
-    return G;
-}
-
-vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1, Timer* timer = nullptr)
+vector<double> dijkstra_lazy(const Graph &G, int s, int t, std::vector<std::pair<int, int>>& explored_edges, vector<int>& prev, Timer* timer)
 {
     timer->start();
-
     int n = G.size();
     vector<double> dist(n, INF);
     vector<char> vis(n, 0);
@@ -41,6 +19,11 @@ vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1, Timer* timer = n
     priority_queue<Node, vector<Node>, greater<Node>> pq;
     dist[s] = 0;
     pq.emplace(0, s);
+
+    // For path reconstruction
+    timer->pause();
+    prev.assign(n, -1);
+    timer->start();
 
     while (!pq.empty())
     {
@@ -56,8 +39,18 @@ vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1, Timer* timer = n
             if (!vis[v] && d + w < dist[v])
             {
                 dist[v] = d + w;
+
+                timer->pause();
+                prev[v] = u;
+                timer->start();
+
                 pq.emplace(dist[v], v);
             }
+
+            // Logging visited edges
+            timer->pause();
+            explored_edges.push_back({u, v});
+            timer->start();
         }
     }
 
@@ -67,15 +60,20 @@ vector<double> dijkstra_lazy(const Graph &G, int s, int t = -1, Timer* timer = n
 
 int main()
 {
-    // Graph G(4);
-    // G[0] = {{1, 1}, {2, 4}};
-    // G[1] = {{2, 2}, {3, 5}};
-    // G[2] = {{3, 1}};
-    // auto d = dijkstra_lazy(G, 0);
-    // cout << "dist(0->3)=" << d[3] << "\n"; // should print 4
+    string input = "../input_edges/graph_large_edges.txt";
+    string explored_output = "../map_data/graph_large_visited_edges_dijk_lazy.txt";
+    string path_output = "../map_data/graph_large_final_nodes_dijk_lazy.txt";
+
     Timer runtime;
-    Graph G = read_graph("../map_data/graph_large_edges.txt");
-    auto dist = dijkstra_lazy(G, 0, G.size()-1, &runtime);
-    cout<<dist[ G.size()-1]<<"\n";
-	cout << "time = " << runtime.elapsed() << " seconds\n";
+    Graph G = read_graph(input);
+    int s = 0, t = G.size() - 1;
+    vector<int> prev;
+    std::vector<std::pair<int, int>> explored;
+
+    auto dist = dijkstra_lazy(G, s, t, explored, prev, &runtime);
+    write_edges(explored_output, explored);
+    write_path(path_output, reconstruct_path(prev, t));
+
+    cout << "Shortest distance: " << dist[t] << "\n";
+    cout << "Time: " << runtime.elapsed() << " seconds\n"; 
 }

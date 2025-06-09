@@ -2,6 +2,7 @@
 //./dijkstra.exe
 
 #include "../helpers/timer.h"
+#include "../helpers/graph_io.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -11,102 +12,66 @@
 #include <stack>
 
 using namespace std;
+const double INF = numeric_limits<double>::infinity();
 
-const int INF = numeric_limits<int>::max();
-
-// Structure for edges
-struct Edge {
-    int to;
-    int weight;
-};
-
-void run_dijk_generated(Timer* timer = nullptr) {
+vector<double> run_dijk_generated(const Graph &G, int s, int t, std::vector<std::pair<int, int>>& explored_edges, vector<int>& prev, Timer* timer) {
+    
     timer->start();
-    // --- Parameters ---
-    const string input_file = "../input_edges/graph_large_edges.txt";
-    const string explored_output = "../map_data/graph_large_visited_edges.txt";
-    const string path_output = "../map_data/graph_large_final_nodes.txt";
-    const int start_node = 20;     // <---- Hardcoded start
-    const int target_node = 100;  // <---- Hardcoded target (adjust!)
-
-    // --- Read graph ---
-    ifstream infile(input_file);
-    if (!infile) {
-        cerr << "Failed to open input file: " << input_file << "\n";
-        return;
-    }
-
-    int n, m;
-    infile >> n >> m;
-
-    vector<vector<Edge>> adj(n);
-    for (int i = 0; i < m; ++i) {
-        int u, v, w;
-        infile >> u >> v >> w;
-        adj[u].push_back({v, w});
-    }
-
-    // --- Dijkstra ---
-    vector<int> dist(n, INF);
-    vector<int> prev(n, -1);
+    int n = G.size();
+    vector<double> dist(n, INF);
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
-    unordered_set<string> explored_edges;
+    dist[s] = 0;
+    pq.push({0, s});
 
-    dist[start_node] = 0;
-    pq.push({0, start_node});
+    // For path reconstruction
+    timer->pause();
+    prev.assign(n, -1);
+    timer->start();
 
     while (!pq.empty()) {
         auto [d, u] = pq.top(); pq.pop();
         if (d > dist[u]) continue;
 
-        for (const auto& edge : adj[u]) {
-            int v = edge.to, w = edge.weight;
+        for (const auto& edge : G[u]) {
+            int v = edge.to;
+            double w = edge.w;
             if (dist[v] > dist[u] + w) {
                 dist[v] = dist[u] + w;
+                
+                timer->pause();
                 prev[v] = u;
+                timer->start();
+
                 pq.push({dist[v], v});
             }
-            // Log all explored (visited) edges
-            explored_edges.insert(to_string(u) + " " + to_string(v));
-        }
-    }
 
-    // --- Write explored edges ---
-    ofstream explored_out(explored_output);
-    for (const auto& entry : explored_edges) {
-        explored_out << entry << "\n";
-    }
-
-    // --- Reconstruct final path ---
-    ofstream path_out(path_output);
-    stack<int> path;
-    int current = target_node;
-    while (current != -1) {
-        path.push(current);
-        current = prev[current];
-    }
-
-    if (dist[target_node] == INF) {
-        cerr << "No path found from " << start_node << " to " << target_node << "\n";
-    } else {
-        while (!path.empty()) {
-            path_out << path.top() << " " << "\n";
-            path.pop();
+            // Logging visited edges
+            timer->pause();
+            explored_edges.push_back({u, v});
+            timer->start();
         }
     }
 
     timer->pause();
-
-    cout << "✅ Dijkstra complete.\n";
-    cout << "🛣  Shortest distance: " << dist[target_node] << " meters\n";
-    cout << "📄 Explored: " << explored_output << "\n";
-    cout << "📄 Final path: " << path_output << "\n";
+    return dist;
 }
 
 int main() {
-    Timer runtime;
-    run_dijk_generated(&runtime);  // or whatever your function is called
-    cout << "time = " << runtime.elapsed() << " seconds\n";
-    return 0;
 
+    string input = "../input_edges/graph_large_edges.txt";
+    string explored_output = "../map_data/graph_large_visited_edges_dijk_generated.txt";
+    string path_output = "../map_data/graph_large_final_nodes_dijk_generated.txt";
+
+    Timer runtime;
+    Graph G = read_graph(input);
+    int s = 0, t = G.size() - 1;
+    vector<int> prev;
+    std::vector<std::pair<int, int>> explored;
+
+    auto dist = run_dijk_generated(G, s, t, explored, prev, &runtime); 
+    write_edges(explored_output, explored);
+    write_path(path_output, reconstruct_path(prev, t));
+
+    cout << "Shortest distance: " << dist[t] << "\n";
+    cout << "Time: " << runtime.elapsed() << " seconds\n";
 }
