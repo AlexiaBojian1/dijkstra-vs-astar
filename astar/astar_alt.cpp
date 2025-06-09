@@ -2,37 +2,13 @@
 // a triangle-inequality heuristic that tightens estimates without losing admissibility.
 
 #include "../helpers/timer.h"
+#include "../helpers/graph_io.h"
 #include <iostream>
 
 #include <bits/stdc++.h>
+
 using namespace std;
-
-struct Edge
-{
-    int to;
-    double w;
-};
-using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
-
-Graph read_graph(const string &fname)
-{
-    ifstream in(fname);
-    if (!in)
-        throw runtime_error("cannot open " + fname);
-
-    int n, m;
-    in >> n >> m;
-    Graph G(n);
-    for (int i = 0, u, v; i < m; ++i)
-    {
-        double w;
-        in >> u >> v >> w;
-        G[u].push_back({v, w});
-        G[v].push_back({u, w}); // remove if the graph is directed
-    }
-    return G;
-}
 
 //plain Dijkstra (lazy heap) – used for preprocessing
 vector<double> dijkstra(const Graph &G, int s)
@@ -139,8 +115,12 @@ struct MultiALT
 // A* search with ALT heuristic
 vector<double> astar_best(const Graph &G,
                           int s, int t,
-                          const MultiALT &h)
+                          const MultiALT &h,
+                          std::vector<std::pair<int, int>>& explored_edges, 
+                          vector<int>& prev, 
+                          Timer* timer)
 {
+    timer->start();
     int n = G.size();
     vector<double> g(n, INF);
     vector<char> vis(n, 0);
@@ -149,6 +129,12 @@ vector<double> astar_best(const Graph &G,
 
     g[s] = 0;
     pq.emplace(h(s), s); // f(s)=h(s)
+
+    // For path reconstruction
+    timer->pause();
+    prev.assign(n, -1);
+    timer->start();
+
 
     while (!pq.empty())
     {
@@ -161,29 +147,50 @@ vector<double> astar_best(const Graph &G,
         if (u == t)
             break; // goal reached
 
-        for (auto [v, w] : G[u])
+        for (auto [v, w] : G[u]) {
             if (!vis[v] && g[u] + w < g[v])
             {
                 g[v] = g[u] + w;
+
+                timer->pause();
+                prev[v] = u;
+                timer->start();
+
                 pq.emplace(g[v] + h(v), v);
             }
+            // Logging visited edges
+            timer->pause();
+            explored_edges.push_back({u, v});
+            timer->start();
+        } 
     }
+
+    timer->pause();
     return g; // g[t] holds distance
 }
 
 int main()
 {
-    const string path = "/home/alexia/algo/dijkstra-vs-astar/data/graph_large.txt";
-    Graph G = read_graph(path);
+    string input = "../input_edges/graph_large_edges.txt";
+    string explored_output = "../map_data/graph_large_visited_edges_astar_alt.txt";
+    string path_output = "../map_data/graph_large_final_nodes_astar_alt.txt";
 
+    Timer runtime;
+    Graph G = read_graph(input);
     int s = 0;
     int t = static_cast<int>(G.size()) - 1;
+    vector<int> prev;
+    std::vector<std::pair<int, int>> explored;
 
     int k = 8; // number of landmarks
     auto L = pick_landmarks(G, k);
     auto distL = preprocess_landmarks(G, L);
     MultiALT h(std::move(distL), t);
 
-    auto d = astar_best(G, s, t, h);
-    cout << d[t] << '\n'; // print distance
+    auto dist = astar_best(G, s, t, h, explored, prev, &runtime);
+    write_edges(explored_output, explored);
+    write_path(path_output, reconstruct_path(prev, t));
+
+    cout << "Shortest distance: " << dist[t] << "\n";
+    cout << "Time: " << runtime.elapsed() << " seconds\n";
 }

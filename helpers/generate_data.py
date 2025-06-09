@@ -6,20 +6,23 @@ import overpy # we can load data from OSM using Overpass API, use roads as edges
 import geopy.distance # we can closely approximate distance using geodesic distance between two points 
 
 
-AREA_NAME = "Eindhoven"   
-EDGES_TXT = "../input_edges/graph_large_edges.txt"
-NODES_TXT = "../map_data/graph_large_nodes.txt"
+##AREA_NAME = "Netherlands"   
+##area["name"="{AREA_NAME}"]->.searchArea;
+area_id = 3600047796  # Area ID for Netherlands
+EDGES_TXT = "../input_edges/graph_Netherlands_edges.txt"
+NODES_TXT = "../map_data/graph_Netherlands_nodes.txt"
 
 
 api = overpy.Overpass()
 query = f"""
-[out:json][timeout:60];
-area["name"="{AREA_NAME}"]->.searchArea;
+[out:json][timeout:1200];
+area({area_id})->.searchArea;
 (
-  way["highway"](area.searchArea);
-  >;
+  way["highway"="primary"](area.searchArea);
 );
 out body;
+>;
+out skel qt;
 """
 
 print(f"Querying Overpass API...")

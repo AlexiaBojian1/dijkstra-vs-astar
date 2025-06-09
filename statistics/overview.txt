@@ -1,0 +1,4 @@
+1. generate data
+2. compile and run the algorithms
+3. make statistics
+4. visualize
