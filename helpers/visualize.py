@@ -1,18 +1,18 @@
 import folium
 
 # always needs to be set
-OUTPUT_MAP = "graph_large_map.html"
-NODES_TXT = "graph_large_nodes.txt"
+OUTPUT_MAP = "../outputmaps/graph_large_map.html"
+NODES_TXT = "../map_data/graph_large_nodes.txt"
 
 # needs to be set to true if wants to be executed
-visualize_all = True
-EDGES_TXT = "graph_large_edges.txt"
+visualize_all = False
+EDGES_TXT = "../input_edges/graph_large_edges.txt"
 
 visualize_visited = True
-VISITED_TXT = "graph_large_visited_edges.txt"
+VISITED_TXT = "../map_data/graph_large_visited_edges.txt"
 
 visualize_final = True
-FINAL_TXT = "graph_large_final_nodes.txt"
+FINAL_TXT = "../map_data/graph_large_final_nodes.txt"
 
 
 print("Reading the nodes from file...")

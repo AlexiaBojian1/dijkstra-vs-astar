@@ -1,6 +1,8 @@
 //Decrease-key heap Dijkstra: uses a binary (or pairing) heap’s decrease-key operation to update a 
 //vertex’s distance in place, giving optimal O((V + E) log V) without wasted inserts.
 
+#include "../helpers/timer.h"
+#include <iostream>
 #include <bits/stdc++.h>
 using namespace std;
 struct Edge
@@ -77,8 +79,9 @@ public:
     int index(int v) const { return pos[v]; }
 };
 
-vector<double> dijkstra_dec_key(const Graph &G, int s, int t = -1)
+vector<double> dijkstra_dec_key(const Graph &G, int s, int t = -1, Timer* timer = nullptr)
 {
+    timer->start();
     int n = G.size();
     vector<double> dist(n, INF);
     vector<char> vis(n, 0);
@@ -103,16 +106,19 @@ vector<double> dijkstra_dec_key(const Graph &G, int s, int t = -1)
                     bh.decrease(v, dist[v]);
             }
     }
+    timer->pause();
     return dist;
 }
 
 /* ---------- demo ---------- */
 int main()
 {
+    Timer runtime;
     Graph G(4);
     G[0] = {{1, 1}, {2, 4}};
     G[1] = {{2, 2}, {3, 5}};
     G[2] = {{3, 1}};
-    auto d = dijkstra_dec_key(G, 0);
+    auto d = dijkstra_dec_key(G, 0, &runtime);
     cout << "dist(0->3)=" << d[3] << "\n"; // 4
+    cout << "time = " << runtime.elapsed() << " seconds\n";
 }

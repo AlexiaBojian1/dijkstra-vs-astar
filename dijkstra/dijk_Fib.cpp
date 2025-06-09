@@ -1,6 +1,8 @@
 //Fibonacci-heap Dijkstra: replaces the heap with a Fibonacci heap so decrease-key is amortized O(1), 
 //dropping the total time to O(E + V log V) at the cost of higher constant factors.
 
+#include "../helpers/timer.h"
+#include <iostream>
 #include <bits/stdc++.h>
 #include <boost/heap/fibonacci_heap.hpp>
 using namespace std;
@@ -12,8 +14,9 @@ struct Edge
 using Graph = vector<vector<Edge>>;
 const double INF = numeric_limits<double>::infinity();
 
-vector<double> dijkstra_fib(const Graph &G, int s, int t = -1)
+vector<double> dijkstra_fib(const Graph &G, int s, int t = -1, Timer* timer = nullptr)
 {
+    timer->start();
     using Node = pair<double, int>;
     using Fib = boost::heap::fibonacci_heap<Node, boost::heap::compare<greater<Node>>>;
     using Handle = Fib::handle_type;
@@ -43,16 +46,19 @@ vector<double> dijkstra_fib(const Graph &G, int s, int t = -1)
                     pq.update(ref[v], {dist[v], v});
             }
     }
+    timer->pause();
     return dist;
 }
 
 /* ---------- demo ---------- */
 int main()
 {
+    Timer runtime;
     Graph G(4);
     G[0] = {{1, 1}, {2, 4}};
     G[1] = {{2, 2}, {3, 5}};
     G[2] = {{3, 1}};
-    auto d = dijkstra_fib(G, 0);
+    auto d = dijkstra_fib(G, 0, &runtime);
     cout << "dist(0->3)=" << d[3] << "\n"; // 4
+    cout << "time = " << runtime.elapsed() << " seconds\n";
 }

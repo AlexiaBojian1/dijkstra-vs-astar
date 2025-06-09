@@ -1,6 +1,7 @@
-//g++ -std=c++17 Dijkstra_generated.cpp -o dijkstra.exe
+//g++ -std=c++17 dijk_generated.cpp -o dijkstra.exe
 //./dijkstra.exe
 
+#include "../helpers/timer.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -19,9 +20,10 @@ struct Edge {
     int weight;
 };
 
-int main() {
+void run_dijk_generated(Timer* timer = nullptr) {
+    timer->start();
     // --- Parameters ---
-    const string input_file = "../map_data/graph_large_edges.txt";
+    const string input_file = "../input_edges/graph_large_edges.txt";
     const string explored_output = "../map_data/graph_large_visited_edges.txt";
     const string path_output = "../map_data/graph_large_final_nodes.txt";
     const int start_node = 20;     // <---- Hardcoded start
@@ -30,8 +32,8 @@ int main() {
     // --- Read graph ---
     ifstream infile(input_file);
     if (!infile) {
-        cerr << "Failed to open graph.txt\n";
-        return 1;
+        cerr << "Failed to open input file: " << input_file << "\n";
+        return;
     }
 
     int n, m;
@@ -93,10 +95,18 @@ int main() {
         }
     }
 
+    timer->pause();
+
     cout << "✅ Dijkstra complete.\n";
     cout << "🛣  Shortest distance: " << dist[target_node] << " meters\n";
     cout << "📄 Explored: " << explored_output << "\n";
     cout << "📄 Final path: " << path_output << "\n";
+}
 
+int main() {
+    Timer runtime;
+    run_dijk_generated(&runtime);  // or whatever your function is called
+    cout << "time = " << runtime.elapsed() << " seconds\n";
     return 0;
+
 }

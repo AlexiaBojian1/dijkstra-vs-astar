@@ -1,41 +1,11 @@
+// g++ -std=c++17 -Iinclude dijkstra/dijk_lazy.cpp helpers/timer.cpp -o build/dijkstra_lazy_large
+// ./build/dijkstra_lazy_large.exe
 //Lazy binary-heap Dijkstra: pushes every tentative edge cost into a binary heap and simply ignores outdated entries when popped, 
 //trading extra inserts for simpler code.
+#include "../helpers/timer.h"
+#include <iostream>
 #include <bits/stdc++.h>
 #include <fstream>
-
-class Timer {
-public:
-	Timer() {
-		start_time = std::chrono::system_clock::now();
-	}
-	void start() {
-        if (!running) {
-            running = true;
-            start_time = std::chrono::high_resolution_clock::now();
-        }
-    }
-
-    void pause() {
-        if (running) {
-            auto now = std::chrono::high_resolution_clock::now();
-            total_elapsed += std::chrono::duration<double>(now - start_time).count();
-            running = false;
-        }
-    }
-
-    double elapsed() const {
-        if (running) {
-            auto now = std::chrono::high_resolution_clock::now();
-            return total_elapsed + std::chrono::duration<double>(now - start_time).count();
-        }
-        return total_elapsed;
-    }
-
-private:
-    bool running;
-    double total_elapsed;
-    std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
-};
 
 using namespace std;
 struct Edge
@@ -108,5 +78,4 @@ int main()
     auto dist = dijkstra_lazy(G, 0, G.size()-1, &runtime);
     cout<<dist[ G.size()-1]<<"\n";
 	cout << "time = " << runtime.elapsed() << " seconds\n";
-
 }

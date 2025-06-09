@@ -7,8 +7,8 @@ import geopy.distance # we can closely approximate distance using geodesic dista
 
 
 AREA_NAME = "Eindhoven"   
-EDGES_TXT = "graph_large_edges.txt"
-NODES_TXT = "graph_large_nodes.txt"
+EDGES_TXT = "../input_edges/graph_large_edges.txt"
+NODES_TXT = "../map_data/graph_large_nodes.txt"
 
 
 api = overpy.Overpass()

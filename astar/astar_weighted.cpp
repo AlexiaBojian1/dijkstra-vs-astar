@@ -1,1 +1,4 @@
 //Weighted A* (ε-optimal): uses f = g + w·h with w > 1 (e.g., 1.5) to bias the search toward the goal, finding a path no worse than w times optimal much faster.
+
+#include "../helpers/timer.h"
+#include <iostream>
