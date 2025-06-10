@@ -2,24 +2,26 @@ import folium
 import math
 
 datasets = ["large", "Netherlands"]
+datasets = ["Netherlands"]
 algorithms = ["dijk_lazy", "dijk_decKey", "dijk_Fib", "astar_alt", "astar_weighted"]
+algorithms = ["astar_alt"]
 
 for dataset in datasets: 
     for algorithm in algorithms:
 
         print("==============   Dataset " + dataset + " and algorithm " + algorithm + "   =================")
 
-        OUTPUT_MAP = "../output_maps/graph_" + dataset + "_map_" + algorithm + ".html"
+        OUTPUT_MAP = "../output_maps/graph_" + dataset + "_map_" + algorithm + "_only_visited.html"
         NODES_TXT = "../map_data/graph_" + dataset + "_nodes.txt"
 
         # needs to be set to true if wants to be executed
-        visualize_all = True
+        visualize_all = False
         EDGES_TXT = "../input_edges/graph_" + dataset + "_edges.txt"
 
         visualize_visited = True
         VISITED_TXT = "../map_data/graph_" + dataset + "_visited_edges_" + algorithm + ".txt"
 
-        visualize_final = True
+        visualize_final = False
         FINAL_TXT = "../map_data/graph_" + dataset + "_final_nodes_" + algorithm + ".txt"
 
 
