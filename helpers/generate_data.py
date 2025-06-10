@@ -6,27 +6,32 @@ import overpy # we can load data from OSM using Overpass API, use roads as edges
 import geopy.distance # we can closely approximate distance using geodesic distance between two points 
 
 
-##AREA_NAME = "Netherlands"   
+AREA_NAME = "Netherlands"   
 ##area["name"="{AREA_NAME}"]->.searchArea;
 area_id = 3600047796  # Area ID for Netherlands
-EDGES_TXT = "../input_edges/graph_Netherlands_edges.txt"
-NODES_TXT = "../map_data/graph_Netherlands_nodes.txt"
+EDGES_TXT = "../input_edges/graph_" + AREA_NAME + "_edges.txt"
+NODES_TXT = "../map_data/graph_" + AREA_NAME + "_nodes.txt"
 
 
 api = overpy.Overpass()
-query = f"""
-[out:json][timeout:1200];
-area({area_id})->.searchArea;
-(
-  way["highway"="primary"](area.searchArea);
-);
-out body;
->;
-out skel qt;
-"""
+def query_highways(highway_type):
+    print(f"Querying Overpass API for '{highway_type}' roads...")
+    query = f"""
+    [out:json][timeout:1200];
+    area({area_id})->.searchArea;
+    (
+      way["highway"="{highway_type}"](area.searchArea);
+    );
+    out body;
+    >;
+    out skel qt;
+    """
+    return api.query(query)
 
-print(f"Querying Overpass API...")
-result = api.query(query) 
+# Query separately
+result_primary = query_highways("primary")
+result_secondary = query_highways("secondary")
+
 
 # has result.nodes and result.ways
 # each node has .id, .lat, .lon, .tags
@@ -35,19 +40,25 @@ result = api.query(query)
 # example: print(f"Way {way.id}: {[n.id for n in way.nodes]}") gives Way 4243215: [652808599, 1931472267, 1931472269, 1430537649, 1520517695, 25243566]
 # print(f"Tags: {way.tags}") gives Tags: {'bicycle': 'permissive', 'highway': 'pedestrian', 'lit': 'yes', 'name': 'Groot Paradijs', 'surface': 'paving_stones', 'zone:traffic': 'NL:urban'}
 
-print("Filling in nodes dictionary with OSM values...")
-nodes = {node.id: (float(node.lat), float(node.lon)) for node in result.nodes}
+# Merge nodes
+print("Merging node data...")
+all_nodes = {node.id: (float(node.lat), float(node.lon)) for node in result_primary.nodes}
+for node in result_secondary.nodes:
+    all_nodes[node.id] = (float(node.lat), float(node.lon))  # override or add
+
+# Merge ways
+all_ways = result_primary.ways + result_secondary.ways
 
 print("Filling in edges array with OSM values FromID, ToID, Length...")
 edges = []
-for way in result.ways:
+for way in all_ways:
     is_oneway = way.tags.get("oneway") == "yes"
     node_ids = [n.id for n in way.nodes]
 
     # forward direction
     for i in range(len(node_ids) - 1):
         from_id, to_id = node_ids[i], node_ids[i + 1]
-        coord1, coord2 = nodes[from_id], nodes[to_id]
+        coord1, coord2 = all_nodes[from_id], all_nodes[to_id]
         dist = geopy.distance.geodesic(coord1, coord2).meters
         edges.append((from_id, to_id, round(dist)))
 
@@ -55,12 +66,12 @@ for way in result.ways:
     if not is_oneway:
         for i in range(len(node_ids) - 1):
             from_id, to_id = node_ids[i + 1], node_ids[i]
-            coord1, coord2 = nodes[from_id], nodes[to_id]
+            coord1, coord2 = all_nodes[from_id], all_nodes[to_id]
             dist = geopy.distance.geodesic(coord1, coord2).meters
             edges.append((from_id, to_id, round(dist)))
 
 print("Mapping OSM node IDs to 0-based and consecutive IDs...")
-nodes_reindexed = {node_id: id for id, node_id in enumerate(nodes)}
+nodes_reindexed = {node_id: id for id, node_id in enumerate(all_nodes)}
 
 print("Write number of nodes, edges, and for each edge reindexed FromID ToID Length into the input file...")
 num_nodes = len(nodes_reindexed)
@@ -75,7 +86,7 @@ with open(EDGES_TXT, "w") as f:
 
 print("Write IDs and corresponding lat and lon for each node into a file for future visualization...")
 with open(NODES_TXT, "w") as f:
-    for osm_id, (lat, lon) in nodes.items():
+    for osm_id, (lat, lon) in all_nodes.items():
         f.write(f"{nodes_reindexed[osm_id]} {lat} {lon}\n")
 
 print("Done.")

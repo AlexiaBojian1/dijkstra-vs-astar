@@ -1,6 +1,9 @@
 # analyze_sparsness.py
 
-EDGE_FILE = "../input_edges/graph_large_edges.txt"
+
+datasets = ["large", "Netherlands"]
+dataset = datasets[1]
+EDGE_FILE = "../input_edges/graph_" + dataset + "_edges.txt"
 
 
 with open(EDGE_FILE, "r") as f:

@@ -171,26 +171,34 @@ vector<double> astar_best(const Graph &G,
 
 int main()
 {
-    string input = "../input_edges/graph_large_edges.txt";
-    string explored_output = "../map_data/graph_large_visited_edges_astar_alt.txt";
-    string path_output = "../map_data/graph_large_final_nodes_astar_alt.txt";
+    vector<pair<string, int>> datasets = {
+        {"large", 0},
+        {"Netherlands", 60000}
+    };
 
-    Timer runtime;
-    Graph G = read_graph(input);
-    int s = 0;
-    int t = static_cast<int>(G.size()) - 1;
-    vector<int> prev;
-    std::vector<std::pair<int, int>> explored;
+    for (const auto& [name, source] : datasets) {
 
-    int k = 8; // number of landmarks
-    auto L = pick_landmarks(G, k);
-    auto distL = preprocess_landmarks(G, L);
-    MultiALT h(std::move(distL), t);
+        string input = "../input_edges/graph_" + name + "_edges.txt";
+        string explored_output = "../map_data/graph_" + name + "_visited_edges_astar_alt.txt";
+        string path_output = "../map_data/graph_" + name + "_final_nodes_astar_alt.txt";
 
-    auto dist = astar_best(G, s, t, h, explored, prev, &runtime);
-    write_edges(explored_output, explored);
-    write_path(path_output, reconstruct_path(prev, t));
+        Timer runtime;
+        Graph G = read_graph(input);
+        int s = source;
+        int t = static_cast<int>(G.size()) - 1;
+        vector<int> prev;
+        std::vector<std::pair<int, int>> explored;
 
-    cout << "Shortest distance: " << dist[t] << "\n";
-    cout << "Time: " << runtime.elapsed() << " seconds\n";
+        int k = 8; // number of landmarks
+        auto L = pick_landmarks(G, k);
+        auto distL = preprocess_landmarks(G, L);
+        MultiALT h(std::move(distL), t);
+
+        auto dist = astar_best(G, s, t, h, explored, prev, &runtime);
+        write_edges(explored_output, explored);
+        write_path(path_output, reconstruct_path(prev, t));
+
+        cout << "Shortest distance (" << name << "): " << dist[t] << "\n";
+        cout << "Time (" << name << "): " << runtime.elapsed() << " seconds\n";
+    } 
 }

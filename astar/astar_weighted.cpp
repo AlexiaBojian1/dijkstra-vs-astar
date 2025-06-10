@@ -74,25 +74,32 @@ vector<double> astar_weighted(const Graph &G,
 
 int main()
 {
-    string input = "../input_edges/graph_large_edges.txt";
-    string explored_output = "../map_data/graph_large_visited_edges_astar_weighted.txt";
-    string path_output = "../map_data/graph_large_final_nodes_astar_weighted.txt";
+    vector<pair<string, int>> datasets = {
+        {"large", 0},
+        {"Netherlands", 60000}
+    };
 
-    Timer runtime;
-    Graph G = read_graph(input);
-    int s = 0;
-    int t = static_cast<int>(G.size()) - 1;
-    vector<int> prev;
-    std::vector<std::pair<int, int>> explored;
+    for (const auto& [name, source] : datasets) {
+        string input = "../input_edges/graph_" + name + "_edges.txt";
+        string explored_output = "../map_data/graph_" + name + "_visited_edges_astar_weighted.txt";
+        string path_output = "../map_data/graph_" + name + "_final_nodes_astar_weighted.txt";
 
-    /* Heuristic: all zeros (admissible but uninformed).
-       Replace with domain-specific values for better speed. */
-    vector<double> h(G.size(), 0.0);
+        Timer runtime;
+        Graph G = read_graph(input);
+        int s = source;
+        int t = static_cast<int>(G.size()) - 1;
+        vector<int> prev;
+        std::vector<std::pair<int, int>> explored;
 
-    auto dist = astar_weighted(G, s, t, h, 1.5, explored, prev, &runtime); // w = 1.5
-    write_edges(explored_output, explored);
-    write_path(path_output, reconstruct_path(prev, t));
+        /* Heuristic: all zeros (admissible but uninformed).
+        Replace with domain-specific values for better speed. */
+        vector<double> h(G.size(), 0.0);
 
-    cout << "Shortest distance: " << dist[t] << "\n";
-    cout << "Time: " << runtime.elapsed() << " seconds\n";
+        auto dist = astar_weighted(G, s, t, h, 1.5, explored, prev, &runtime); // w = 1.5
+        write_edges(explored_output, explored);
+        write_path(path_output, reconstruct_path(prev, t));
+
+        cout << "Shortest distance (" << name << "): " << dist[t] << "\n";
+        cout << "Time (" << name << "): " << runtime.elapsed() << " seconds\n";
+    }
 }

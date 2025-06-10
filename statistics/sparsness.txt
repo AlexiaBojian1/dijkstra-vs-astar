@@ -1,0 +1,30 @@
+## Eindhoven
+Nodes listed in file header: 93294
+Unique node IDs found in edges: 93294
+Edges: 196880
+Sparsity: 0.999977 (1 = no edges, 0 = fully connected)
+
+Out-degree distribution:
+  1 outgoing edges → 18647 nodes
+  2 outgoing edges → 49736 nodes
+  3 outgoing edges → 20790 nodes
+  4 outgoing edges → 3950 nodes
+  5 outgoing edges → 102 nodes
+  6 outgoing edges → 10 nodes
+  7 outgoing edges → 3 nodes
+
+Nodes with 0 outgoing edges: 56
+
+## the Netherlands
+Nodes listed in file header: 545119
+Unique node IDs found in edges: 545119
+Edges: 850494
+Sparsity: 0.999997 (1 = no edges, 0 = fully connected)
+
+Out-degree distribution:
+  1 outgoing edges → 248411 nodes
+  2 outgoing edges → 286930 nodes
+  3 outgoing edges → 9329 nodes
+  4 outgoing edges → 59 nodes
+
+Nodes with 0 outgoing edges: 390

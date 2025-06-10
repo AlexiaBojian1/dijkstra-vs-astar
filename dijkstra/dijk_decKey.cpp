@@ -126,20 +126,27 @@ vector<double> dijkstra_dec_key(const Graph &G, int s, int t, std::vector<std::p
 /* ---------- demo ---------- */
 int main()
 {
-    string input = "../input_edges/graph_large_edges.txt";
-    string explored_output = "../map_data/graph_large_visited_edges_dijk_generated.txt";
-    string path_output = "../map_data/graph_large_final_nodes_dijk_generated.txt";
+    vector<pair<string, int>> datasets = {
+        {"large", 0},
+        {"Netherlands", 60000}
+    };
 
-    Timer runtime;
-    Graph G = read_graph(input);
-    int s = 0, t = G.size() - 1;
-    vector<int> prev;
-    std::vector<std::pair<int, int>> explored;
+    for (const auto& [name, source] : datasets) {
+        string input = "../input_edges/graph_" + name + "_edges.txt";
+        string explored_output = "../map_data/graph_" + name + "_visited_edges_dijk_decKey.txt";
+        string path_output = "../map_data/graph_" + name + "_final_nodes_dijk_decKey.txt";
 
-    auto dist = dijkstra_dec_key(G, s, t, explored, prev, &runtime);
-    write_edges(explored_output, explored);
-    write_path(path_output, reconstruct_path(prev, t));
+        Timer runtime;
+        Graph G = read_graph(input);
+        int s = source, t = G.size() - 1;
+        vector<int> prev;
+        std::vector<std::pair<int, int>> explored;
 
-    cout << "Shortest distance: " << dist[t] << "\n";
-    cout << "Time: " << runtime.elapsed() << " seconds\n";
+        auto dist = dijkstra_dec_key(G, s, t, explored, prev, &runtime);
+        write_edges(explored_output, explored);
+        write_path(path_output, reconstruct_path(prev, t));
+
+        cout << "Shortest distance (" << name << "): " << dist[t] << "\n";
+        cout << "Time (" << name << "): " << runtime.elapsed() << " seconds\n";
+    }
 }

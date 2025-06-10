@@ -26,11 +26,17 @@ echo ==============================
 echo Running dijkstra_generated...
 ..\build\dijkstra_generated.exe
 
+echo ==============================
+
 echo Running dijkstra_lazy...
 ..\build\dijkstra_lazy.exe
 
+echo ==============================
+
 echo Running dijkstra_decKey...
 ..\build\dijkstra_decKey.exe
+
+echo ==============================
 
 echo Running dijkstra_fib...
 ..\build\dijkstra_fib.exe
