@@ -100,28 +100,51 @@ plt.tight_layout()
 plt.savefig("time_vs_mem.png", dpi=300)
 
 # ---------- 3.4 progress curves ---------------------------------------------
-trace_files = sorted(set(         # deduplicate same trace reachable via '..'
-    re.sub(r'^(\./)?', '', p) for p in glob.glob("**/trace_*.csv", recursive=True)
-))
+# ---------- 3.4 progress curves (fixed) -------------------------------
+import pathlib
+plt.figure(figsize=(6,4))
+
+# ❶  build a dict label → file path   (deduplicates automatically)
+trace_files = {
+    re.sub(r'^.*/trace_(.*)\.csv$', r'\1', str(p)):
+    str(p)
+    for p in pathlib.Path('.').rglob('trace_*.csv')
+}
+
 if not trace_files:
     print("⚠️  No trace_*.csv files found – skipping progress_curves.png")
 else:
-    plt.figure(figsize=(6,4))
     palette = plt.colormaps["tab10"].resampled(len(trace_files))
-    for idx, path in enumerate(trace_files):
-        tr = pd.read_csv(path, names=["ms","nodes"])
+    colour_idx = 0
+    for label, path in sorted(trace_files.items()):
+        tr = pd.read_csv(path, names=['ms','nodes'])
         if tr.empty:
-            print(f"  • empty trace file skipped: {path}")
+            print(f"  • {label}: trace is empty, skipped")
             continue
-        lbl = re.sub(r'^.*/trace_(.*)\.csv$', r'\1', path)
-        plt.plot(tr.ms/1000.0, tr.nodes, label=lbl,
-                 color=palette(idx), linewidth=1)
-    plt.xlabel("Elapsed time (s)")
-    plt.ylabel("Nodes expanded")
-    plt.title("Search progress on large graph")
-    plt.legend(fontsize=7)
-    plt.tight_layout()
-    plt.savefig("progress_curves.png", dpi=300)
+
+        # ❷  sanity-check against the aggregate CSV
+        final_nodes = tr.nodes.iloc[-1]
+        ref_row = df.loc[df.AlgSimple == label]
+        if not ref_row.empty and abs(final_nodes - ref_row.Nodes.iat[0]) > 500:
+            print(f"  • {label}: trace disagrees with CSV "
+                  f"({final_nodes} vs {ref_row.Nodes.iat[0]}), skipped")
+            continue   # don’t plot stale / wrong trace
+
+        plt.plot(tr.ms/1000.0, tr.nodes,
+                 label=label, linewidth=1,
+                 color=palette(colour_idx))
+        colour_idx += 1
+
+    if colour_idx == 0:
+        print("⚠️  All traces skipped – no progress plot generated")
+    else:
+        plt.xlabel("Elapsed time (s)")
+        plt.ylabel("Nodes expanded")
+        plt.title("Search progress on large graph")
+        plt.legend(fontsize=7)
+        plt.tight_layout()
+        plt.savefig("progress_curves.png", dpi=300)
+        print("   • progress_curves.png")
 
 print("\n✅  Plots generated:\n"
       "   • time_vs_nodes.png\n"

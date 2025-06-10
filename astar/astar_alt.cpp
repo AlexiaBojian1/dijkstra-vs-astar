@@ -165,7 +165,7 @@ vector<double> astar_best(const Graph &G, int s, int t,
         vis[u] = 1;
 
         nodes++;
-        static const long SAMPLE = 1000;          // tweak if graph is tiny/huge
+        static const long SAMPLE = 1000;     
         static std::ofstream trace(std::string("trace_") + ALG_NAME + ".csv");
         if (nodes % SAMPLE == 0) {
             auto now  = Clock::now();
@@ -208,7 +208,7 @@ int main()
     MultiALT h(std::move(distL), t);
 
     auto d = astar_best(G, s, t, h);
-    cout << d[t] << '\n'; // print distance
+    cout << d[t] << '\n'; 
     auto end = std::chrono::high_resolution_clock::now();
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
     std::cout << "Time(ms): " << ms << std::endl;

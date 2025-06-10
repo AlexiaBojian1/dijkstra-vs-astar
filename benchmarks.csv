@@ -2,5 +2,5 @@ Algorithm,Time_ms,Nodes,Mem_KB
 dijk_lazy,80,499995, 587127
 dijk_decKey,68,499995,60712
 dijk_Fib,138,499995,62552
-astar_weighted,70,499995,62688
+astar_weighted,0.01,1502,75776
 astar_alt,6,36409,75724
