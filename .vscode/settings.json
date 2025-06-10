@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "limits": "cpp",
+        "chrono": "cpp",
+        "iosfwd": "cpp"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
